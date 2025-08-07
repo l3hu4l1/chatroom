@@ -1,0 +1,14 @@
+syntax = "proto3";
+package protocol;
+
+option go_package = "github.com/l3hu4l1/chatroom/protocol;protocol";
+
+message conn_server {
+     string nickname = 1;
+     string msg = 2;
+ }
+
+ message conn_client {
+     string nickname = 1;
+     string msg = 2;
+ }
