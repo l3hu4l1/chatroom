@@ -69,7 +69,7 @@ func ReadWireMessage(r io.Reader) (*WireMessage, error) {
 		return nil, fmt.Errorf("%w: %d bytes", ErrFrameTooLarge, frameSize)
 	}
 
-	payload := make([]byte, frameSize)
+payload := make([]byte, int(frameSize))
 	if _, err := io.ReadFull(r, payload); err != nil {
 		return nil, err
 	}
