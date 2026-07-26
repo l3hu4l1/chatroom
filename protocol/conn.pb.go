@@ -21,28 +21,37 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type ConnServer struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Nickname      string                 `protobuf:"bytes,1,opt,name=nickname,proto3" json:"nickname,omitempty"`
-	Msg           string                 `protobuf:"bytes,2,opt,name=msg,proto3" json:"msg,omitempty"`
+type WireMessage struct {
+	state   protoimpl.MessageState `protogen:"open.v1"`
+	Version uint32                 `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
+	// Types that are valid to be assigned to Body:
+	//
+	//	*WireMessage_ClientHello
+	//	*WireMessage_ClientMessage
+	//	*WireMessage_ServerWelcome
+	//	*WireMessage_ServerEvent
+	//	*WireMessage_Ping
+	//	*WireMessage_Pong
+	//	*WireMessage_Error
+	Body          isWireMessage_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ConnServer) Reset() {
-	*x = ConnServer{}
+func (x *WireMessage) Reset() {
+	*x = WireMessage{}
 	mi := &file_protocol_conn_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ConnServer) String() string {
+func (x *WireMessage) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ConnServer) ProtoMessage() {}
+func (*WireMessage) ProtoMessage() {}
 
-func (x *ConnServer) ProtoReflect() protoreflect.Message {
+func (x *WireMessage) ProtoReflect() protoreflect.Message {
 	mi := &file_protocol_conn_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -54,47 +63,155 @@ func (x *ConnServer) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ConnServer.ProtoReflect.Descriptor instead.
-func (*ConnServer) Descriptor() ([]byte, []int) {
+// Deprecated: Use WireMessage.ProtoReflect.Descriptor instead.
+func (*WireMessage) Descriptor() ([]byte, []int) {
 	return file_protocol_conn_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ConnServer) GetNickname() string {
+func (x *WireMessage) GetVersion() uint32 {
 	if x != nil {
-		return x.Nickname
+		return x.Version
 	}
-	return ""
+	return 0
 }
 
-func (x *ConnServer) GetMsg() string {
+func (x *WireMessage) GetBody() isWireMessage_Body {
 	if x != nil {
-		return x.Msg
+		return x.Body
 	}
-	return ""
+	return nil
 }
 
-type ConnClient struct {
+func (x *WireMessage) GetClientHello() *ClientHello {
+	if x != nil {
+		if x, ok := x.Body.(*WireMessage_ClientHello); ok {
+			return x.ClientHello
+		}
+	}
+	return nil
+}
+
+func (x *WireMessage) GetClientMessage() *ClientMessage {
+	if x != nil {
+		if x, ok := x.Body.(*WireMessage_ClientMessage); ok {
+			return x.ClientMessage
+		}
+	}
+	return nil
+}
+
+func (x *WireMessage) GetServerWelcome() *ServerWelcome {
+	if x != nil {
+		if x, ok := x.Body.(*WireMessage_ServerWelcome); ok {
+			return x.ServerWelcome
+		}
+	}
+	return nil
+}
+
+func (x *WireMessage) GetServerEvent() *ServerEvent {
+	if x != nil {
+		if x, ok := x.Body.(*WireMessage_ServerEvent); ok {
+			return x.ServerEvent
+		}
+	}
+	return nil
+}
+
+func (x *WireMessage) GetPing() *Ping {
+	if x != nil {
+		if x, ok := x.Body.(*WireMessage_Ping); ok {
+			return x.Ping
+		}
+	}
+	return nil
+}
+
+func (x *WireMessage) GetPong() *Pong {
+	if x != nil {
+		if x, ok := x.Body.(*WireMessage_Pong); ok {
+			return x.Pong
+		}
+	}
+	return nil
+}
+
+func (x *WireMessage) GetError() *ProtocolError {
+	if x != nil {
+		if x, ok := x.Body.(*WireMessage_Error); ok {
+			return x.Error
+		}
+	}
+	return nil
+}
+
+type isWireMessage_Body interface {
+	isWireMessage_Body()
+}
+
+type WireMessage_ClientHello struct {
+	ClientHello *ClientHello `protobuf:"bytes,2,opt,name=client_hello,json=clientHello,proto3,oneof"`
+}
+
+type WireMessage_ClientMessage struct {
+	ClientMessage *ClientMessage `protobuf:"bytes,3,opt,name=client_message,json=clientMessage,proto3,oneof"`
+}
+
+type WireMessage_ServerWelcome struct {
+	ServerWelcome *ServerWelcome `protobuf:"bytes,4,opt,name=server_welcome,json=serverWelcome,proto3,oneof"`
+}
+
+type WireMessage_ServerEvent struct {
+	ServerEvent *ServerEvent `protobuf:"bytes,5,opt,name=server_event,json=serverEvent,proto3,oneof"`
+}
+
+type WireMessage_Ping struct {
+	Ping *Ping `protobuf:"bytes,6,opt,name=ping,proto3,oneof"`
+}
+
+type WireMessage_Pong struct {
+	Pong *Pong `protobuf:"bytes,7,opt,name=pong,proto3,oneof"`
+}
+
+type WireMessage_Error struct {
+	Error *ProtocolError `protobuf:"bytes,8,opt,name=error,proto3,oneof"`
+}
+
+func (*WireMessage_ClientHello) isWireMessage_Body() {}
+
+func (*WireMessage_ClientMessage) isWireMessage_Body() {}
+
+func (*WireMessage_ServerWelcome) isWireMessage_Body() {}
+
+func (*WireMessage_ServerEvent) isWireMessage_Body() {}
+
+func (*WireMessage_Ping) isWireMessage_Body() {}
+
+func (*WireMessage_Pong) isWireMessage_Body() {}
+
+func (*WireMessage_Error) isWireMessage_Body() {}
+
+type ClientHello struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Nickname      string                 `protobuf:"bytes,1,opt,name=nickname,proto3" json:"nickname,omitempty"`
-	Msg           string                 `protobuf:"bytes,2,opt,name=msg,proto3" json:"msg,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ConnClient) Reset() {
-	*x = ConnClient{}
+func (x *ClientHello) Reset() {
+	*x = ClientHello{}
 	mi := &file_protocol_conn_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ConnClient) String() string {
+func (x *ClientHello) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ConnClient) ProtoMessage() {}
+func (*ClientHello) ProtoMessage() {}
 
-func (x *ConnClient) ProtoReflect() protoreflect.Message {
+func (x *ClientHello) ProtoReflect() protoreflect.Message {
 	mi := &file_protocol_conn_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -106,21 +223,318 @@ func (x *ConnClient) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ConnClient.ProtoReflect.Descriptor instead.
-func (*ConnClient) Descriptor() ([]byte, []int) {
+// Deprecated: Use ClientHello.ProtoReflect.Descriptor instead.
+func (*ClientHello) Descriptor() ([]byte, []int) {
 	return file_protocol_conn_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ConnClient) GetNickname() string {
+func (x *ClientHello) GetNickname() string {
 	if x != nil {
 		return x.Nickname
 	}
 	return ""
 }
 
-func (x *ConnClient) GetMsg() string {
+type ClientMessage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	Room          string                 `protobuf:"bytes,2,opt,name=room,proto3" json:"room,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClientMessage) Reset() {
+	*x = ClientMessage{}
+	mi := &file_protocol_conn_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClientMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClientMessage) ProtoMessage() {}
+
+func (x *ClientMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_protocol_conn_proto_msgTypes[2]
 	if x != nil {
-		return x.Msg
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClientMessage.ProtoReflect.Descriptor instead.
+func (*ClientMessage) Descriptor() ([]byte, []int) {
+	return file_protocol_conn_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ClientMessage) GetText() string {
+	if x != nil {
+		return x.Text
+	}
+	return ""
+}
+
+func (x *ClientMessage) GetRoom() string {
+	if x != nil {
+		return x.Room
+	}
+	return ""
+}
+
+type ServerWelcome struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ConnectionId  uint64                 `protobuf:"varint,1,opt,name=connection_id,json=connectionId,proto3" json:"connection_id,omitempty"`
+	Nickname      string                 `protobuf:"bytes,2,opt,name=nickname,proto3" json:"nickname,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ServerWelcome) Reset() {
+	*x = ServerWelcome{}
+	mi := &file_protocol_conn_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ServerWelcome) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServerWelcome) ProtoMessage() {}
+
+func (x *ServerWelcome) ProtoReflect() protoreflect.Message {
+	mi := &file_protocol_conn_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ServerWelcome.ProtoReflect.Descriptor instead.
+func (*ServerWelcome) Descriptor() ([]byte, []int) {
+	return file_protocol_conn_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ServerWelcome) GetConnectionId() uint64 {
+	if x != nil {
+		return x.ConnectionId
+	}
+	return 0
+}
+
+func (x *ServerWelcome) GetNickname() string {
+	if x != nil {
+		return x.Nickname
+	}
+	return ""
+}
+
+type ServerEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sender        string                 `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
+	Text          string                 `protobuf:"bytes,2,opt,name=text,proto3" json:"text,omitempty"`
+	SentAtUnixMs  uint64                 `protobuf:"varint,3,opt,name=sent_at_unix_ms,json=sentAtUnixMs,proto3" json:"sent_at_unix_ms,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ServerEvent) Reset() {
+	*x = ServerEvent{}
+	mi := &file_protocol_conn_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ServerEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServerEvent) ProtoMessage() {}
+
+func (x *ServerEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_protocol_conn_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ServerEvent.ProtoReflect.Descriptor instead.
+func (*ServerEvent) Descriptor() ([]byte, []int) {
+	return file_protocol_conn_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ServerEvent) GetSender() string {
+	if x != nil {
+		return x.Sender
+	}
+	return ""
+}
+
+func (x *ServerEvent) GetText() string {
+	if x != nil {
+		return x.Text
+	}
+	return ""
+}
+
+func (x *ServerEvent) GetSentAtUnixMs() uint64 {
+	if x != nil {
+		return x.SentAtUnixMs
+	}
+	return 0
+}
+
+type Ping struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SentAtUnixMs  uint64                 `protobuf:"varint,1,opt,name=sent_at_unix_ms,json=sentAtUnixMs,proto3" json:"sent_at_unix_ms,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Ping) Reset() {
+	*x = Ping{}
+	mi := &file_protocol_conn_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Ping) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Ping) ProtoMessage() {}
+
+func (x *Ping) ProtoReflect() protoreflect.Message {
+	mi := &file_protocol_conn_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Ping.ProtoReflect.Descriptor instead.
+func (*Ping) Descriptor() ([]byte, []int) {
+	return file_protocol_conn_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *Ping) GetSentAtUnixMs() uint64 {
+	if x != nil {
+		return x.SentAtUnixMs
+	}
+	return 0
+}
+
+type Pong struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SentAtUnixMs  uint64                 `protobuf:"varint,1,opt,name=sent_at_unix_ms,json=sentAtUnixMs,proto3" json:"sent_at_unix_ms,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Pong) Reset() {
+	*x = Pong{}
+	mi := &file_protocol_conn_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Pong) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Pong) ProtoMessage() {}
+
+func (x *Pong) ProtoReflect() protoreflect.Message {
+	mi := &file_protocol_conn_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Pong.ProtoReflect.Descriptor instead.
+func (*Pong) Descriptor() ([]byte, []int) {
+	return file_protocol_conn_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *Pong) GetSentAtUnixMs() uint64 {
+	if x != nil {
+		return x.SentAtUnixMs
+	}
+	return 0
+}
+
+type ProtocolError struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          uint32                 `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProtocolError) Reset() {
+	*x = ProtocolError{}
+	mi := &file_protocol_conn_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProtocolError) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProtocolError) ProtoMessage() {}
+
+func (x *ProtocolError) ProtoReflect() protoreflect.Message {
+	mi := &file_protocol_conn_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProtocolError.ProtoReflect.Descriptor instead.
+func (*ProtocolError) Descriptor() ([]byte, []int) {
+	return file_protocol_conn_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ProtocolError) GetCode() uint32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *ProtocolError) GetMessage() string {
+	if x != nil {
+		return x.Message
 	}
 	return ""
 }
@@ -129,13 +543,36 @@ var File_protocol_conn_proto protoreflect.FileDescriptor
 
 const file_protocol_conn_proto_rawDesc = "" +
 	"\n" +
-	"\x13protocol/conn.proto\x12\bprotocol\";\n" +
-	"\vconn_server\x12\x1a\n" +
-	"\bnickname\x18\x01 \x01(\tR\bnickname\x12\x10\n" +
-	"\x03msg\x18\x02 \x01(\tR\x03msg\";\n" +
-	"\vconn_client\x12\x1a\n" +
-	"\bnickname\x18\x01 \x01(\tR\bnickname\x12\x10\n" +
-	"\x03msg\x18\x02 \x01(\tR\x03msgB/Z-github.com/l3hu4l1/chatroom/protocol;protocolb\x06proto3"
+	"\x13protocol/conn.proto\x12\bprotocol\"\xa8\x03\n" +
+	"\vWireMessage\x12\x18\n" +
+	"\aversion\x18\x01 \x01(\rR\aversion\x12:\n" +
+	"\fclient_hello\x18\x02 \x01(\v2\x15.protocol.ClientHelloH\x00R\vclientHello\x12@\n" +
+	"\x0eclient_message\x18\x03 \x01(\v2\x17.protocol.ClientMessageH\x00R\rclientMessage\x12@\n" +
+	"\x0eserver_welcome\x18\x04 \x01(\v2\x17.protocol.ServerWelcomeH\x00R\rserverWelcome\x12:\n" +
+	"\fserver_event\x18\x05 \x01(\v2\x15.protocol.ServerEventH\x00R\vserverEvent\x12$\n" +
+	"\x04ping\x18\x06 \x01(\v2\x0e.protocol.PingH\x00R\x04ping\x12$\n" +
+	"\x04pong\x18\a \x01(\v2\x0e.protocol.PongH\x00R\x04pong\x12/\n" +
+	"\x05error\x18\b \x01(\v2\x17.protocol.ProtocolErrorH\x00R\x05errorB\x06\n" +
+	"\x04body\")\n" +
+	"\vClientHello\x12\x1a\n" +
+	"\bnickname\x18\x01 \x01(\tR\bnickname\"7\n" +
+	"\rClientMessage\x12\x12\n" +
+	"\x04text\x18\x01 \x01(\tR\x04text\x12\x12\n" +
+	"\x04room\x18\x02 \x01(\tR\x04room\"P\n" +
+	"\rServerWelcome\x12#\n" +
+	"\rconnection_id\x18\x01 \x01(\x04R\fconnectionId\x12\x1a\n" +
+	"\bnickname\x18\x02 \x01(\tR\bnickname\"`\n" +
+	"\vServerEvent\x12\x16\n" +
+	"\x06sender\x18\x01 \x01(\tR\x06sender\x12\x12\n" +
+	"\x04text\x18\x02 \x01(\tR\x04text\x12%\n" +
+	"\x0fsent_at_unix_ms\x18\x03 \x01(\x04R\fsentAtUnixMs\"-\n" +
+	"\x04Ping\x12%\n" +
+	"\x0fsent_at_unix_ms\x18\x01 \x01(\x04R\fsentAtUnixMs\"-\n" +
+	"\x04Pong\x12%\n" +
+	"\x0fsent_at_unix_ms\x18\x01 \x01(\x04R\fsentAtUnixMs\"=\n" +
+	"\rProtocolError\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\rR\x04code\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessageB/Z-github.com/l3hu4l1/chatroom/protocol;protocolb\x06proto3"
 
 var (
 	file_protocol_conn_proto_rawDescOnce sync.Once
@@ -149,17 +586,30 @@ func file_protocol_conn_proto_rawDescGZIP() []byte {
 	return file_protocol_conn_proto_rawDescData
 }
 
-var file_protocol_conn_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_protocol_conn_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_protocol_conn_proto_goTypes = []any{
-	(*ConnServer)(nil), // 0: protocol.conn_server
-	(*ConnClient)(nil), // 1: protocol.conn_client
+	(*WireMessage)(nil),   // 0: protocol.WireMessage
+	(*ClientHello)(nil),   // 1: protocol.ClientHello
+	(*ClientMessage)(nil), // 2: protocol.ClientMessage
+	(*ServerWelcome)(nil), // 3: protocol.ServerWelcome
+	(*ServerEvent)(nil),   // 4: protocol.ServerEvent
+	(*Ping)(nil),          // 5: protocol.Ping
+	(*Pong)(nil),          // 6: protocol.Pong
+	(*ProtocolError)(nil), // 7: protocol.ProtocolError
 }
 var file_protocol_conn_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	1, // 0: protocol.WireMessage.client_hello:type_name -> protocol.ClientHello
+	2, // 1: protocol.WireMessage.client_message:type_name -> protocol.ClientMessage
+	3, // 2: protocol.WireMessage.server_welcome:type_name -> protocol.ServerWelcome
+	4, // 3: protocol.WireMessage.server_event:type_name -> protocol.ServerEvent
+	5, // 4: protocol.WireMessage.ping:type_name -> protocol.Ping
+	6, // 5: protocol.WireMessage.pong:type_name -> protocol.Pong
+	7, // 6: protocol.WireMessage.error:type_name -> protocol.ProtocolError
+	7, // [7:7] is the sub-list for method output_type
+	7, // [7:7] is the sub-list for method input_type
+	7, // [7:7] is the sub-list for extension type_name
+	7, // [7:7] is the sub-list for extension extendee
+	0, // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_protocol_conn_proto_init() }
@@ -167,13 +617,22 @@ func file_protocol_conn_proto_init() {
 	if File_protocol_conn_proto != nil {
 		return
 	}
+	file_protocol_conn_proto_msgTypes[0].OneofWrappers = []any{
+		(*WireMessage_ClientHello)(nil),
+		(*WireMessage_ClientMessage)(nil),
+		(*WireMessage_ServerWelcome)(nil),
+		(*WireMessage_ServerEvent)(nil),
+		(*WireMessage_Ping)(nil),
+		(*WireMessage_Pong)(nil),
+		(*WireMessage_Error)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protocol_conn_proto_rawDesc), len(file_protocol_conn_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
