@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/l3hu4l1/chatroom/protocol"
+	protocolv1 "github.com/l3hu4l1/chatroom/protocol/v1"
 )
 
 func main() {
@@ -34,10 +35,10 @@ func main() {
 	}
 	fmt.Println("Welcome,", nickname)
 
-	if err := protocol.WriteWireMessage(conn, &protocol.WireMessage{
+	if err := protocol.WriteWireMessage(conn, &protocolv1.WireMessage{
 		Version: protocol.ProtocolVersion,
-		Body: &protocol.WireMessage_ClientHello{
-			ClientHello: &protocol.ClientHello{Nickname: nickname},
+		Body: &protocolv1.WireMessage_ClientHello{
+			ClientHello: &protocolv1.ClientHello{Nickname: nickname},
 		},
 	}); err != nil {
 		fmt.Println("Failed to send hello:", err)
@@ -62,10 +63,10 @@ func main() {
 			return
 		}
 
-		data := &protocol.WireMessage{
+		data := &protocolv1.WireMessage{
 			Version: protocol.ProtocolVersion,
-			Body: &protocol.WireMessage_ClientMessage{
-				ClientMessage: &protocol.ClientMessage{Text: msg},
+			Body: &protocolv1.WireMessage_ClientMessage{
+				ClientMessage: &protocolv1.ClientMessage{Text: msg},
 			},
 		}
 
@@ -85,13 +86,13 @@ func handleConnection(conn net.Conn) {
 		}
 
 		switch body := message.GetBody().(type) {
-		case *protocol.WireMessage_ServerWelcome:
+		case *protocolv1.WireMessage_ServerWelcome:
 			fmt.Println("Server:", body.ServerWelcome.GetNickname(), "connected with id", body.ServerWelcome.GetConnectionId())
-		case *protocol.WireMessage_ServerEvent:
+		case *protocolv1.WireMessage_ServerEvent:
 			fmt.Println("Received message from", body.ServerEvent.GetSender()+":", body.ServerEvent.GetText())
-		case *protocol.WireMessage_Error:
+		case *protocolv1.WireMessage_Error:
 			fmt.Println("Server error:", body.Error.GetMessage())
-		case *protocol.WireMessage_Pong:
+		case *protocolv1.WireMessage_Pong:
 			fmt.Println("Received pong at", body.Pong.GetSentAtUnixMs())
 		default:
 			fmt.Println("Received unsupported message")

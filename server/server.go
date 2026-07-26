@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/l3hu4l1/chatroom/protocol"
+	protocolv1 "github.com/l3hu4l1/chatroom/protocol/v1"
 )
 
 type client struct {
@@ -82,7 +83,7 @@ func (h *chatHub) snapshotExcept(skipID uint64) []*client {
 	return clients
 }
 
-func (c *client) write(message *protocol.WireMessage) error {
+func (c *client) write(message *protocolv1.WireMessage) error {
 	c.writeMu.Lock()
 	defer c.writeMu.Unlock()
 
@@ -101,32 +102,32 @@ func handleConnection(c *client) {
 		}
 
 		if message.GetVersion() != protocol.ProtocolVersion {
-			_ = c.write(&protocol.WireMessage{
+			_ = c.write(&protocolv1.WireMessage{
 				Version: protocol.ProtocolVersion,
-				Body: &protocol.WireMessage_Error{
-					Error: &protocol.ProtocolError{Code: 400, Message: "unsupported protocol version"},
+				Body: &protocolv1.WireMessage_Error{
+					Error: &protocolv1.ProtocolError{Code: 400, Message: "unsupported protocol version"},
 				},
 			})
 			return
 		}
 
 		switch body := message.GetBody().(type) {
-		case *protocol.WireMessage_ClientHello:
+		case *protocolv1.WireMessage_ClientHello:
 			nickname = body.ClientHello.GetNickname()
 			if nickname == "" {
-				_ = c.write(&protocol.WireMessage{
+				_ = c.write(&protocolv1.WireMessage{
 					Version: protocol.ProtocolVersion,
-					Body: &protocol.WireMessage_Error{
-						Error: &protocol.ProtocolError{Code: 400, Message: "nickname cannot be empty"},
+					Body: &protocolv1.WireMessage_Error{
+						Error: &protocolv1.ProtocolError{Code: 400, Message: "nickname cannot be empty"},
 					},
 				})
 				return
 			}
 
-			if err := c.write(&protocol.WireMessage{
+			if err := c.write(&protocolv1.WireMessage{
 				Version: protocol.ProtocolVersion,
-				Body: &protocol.WireMessage_ServerWelcome{
-					ServerWelcome: &protocol.ServerWelcome{ConnectionId: c.id, Nickname: nickname},
+				Body: &protocolv1.WireMessage_ServerWelcome{
+					ServerWelcome: &protocolv1.ServerWelcome{ConnectionId: c.id, Nickname: nickname},
 				},
 			}); err != nil {
 				fmt.Println("Error sending welcome:", err)
@@ -135,12 +136,12 @@ func handleConnection(c *client) {
 
 			fmt.Printf("%s connected\n", nickname)
 
-		case *protocol.WireMessage_ClientMessage:
+		case *protocolv1.WireMessage_ClientMessage:
 			if nickname == "" {
-				_ = c.write(&protocol.WireMessage{
+				_ = c.write(&protocolv1.WireMessage{
 					Version: protocol.ProtocolVersion,
-					Body: &protocol.WireMessage_Error{
-						Error: &protocol.ProtocolError{Code: 400, Message: "hello required before chat messages"},
+					Body: &protocolv1.WireMessage_Error{
+						Error: &protocolv1.ProtocolError{Code: 400, Message: "hello required before chat messages"},
 					},
 				})
 				continue
@@ -151,10 +152,10 @@ func handleConnection(c *client) {
 				continue
 			}
 
-			broadcast := &protocol.WireMessage{
+			broadcast := &protocolv1.WireMessage{
 				Version: protocol.ProtocolVersion,
-				Body: &protocol.WireMessage_ServerEvent{
-					ServerEvent: &protocol.ServerEvent{
+				Body: &protocolv1.WireMessage_ServerEvent{
+					ServerEvent: &protocolv1.ServerEvent{
 						Sender:       nickname,
 						Text:         text,
 						SentAtUnixMs: uint64(time.Now().UnixMilli()),
@@ -171,11 +172,11 @@ func handleConnection(c *client) {
 
 			fmt.Printf("%s: %s\n", nickname, text)
 
-		case *protocol.WireMessage_Ping:
-			if err := c.write(&protocol.WireMessage{
+		case *protocolv1.WireMessage_Ping:
+			if err := c.write(&protocolv1.WireMessage{
 				Version: protocol.ProtocolVersion,
-				Body: &protocol.WireMessage_Pong{
-					Pong: &protocol.Pong{SentAtUnixMs: body.Ping.GetSentAtUnixMs()},
+				Body: &protocolv1.WireMessage_Pong{
+					Pong: &protocolv1.Pong{SentAtUnixMs: body.Ping.GetSentAtUnixMs()},
 				},
 			}); err != nil {
 				fmt.Println("Error sending pong:", err)
@@ -183,10 +184,10 @@ func handleConnection(c *client) {
 			}
 
 		default:
-			_ = c.write(&protocol.WireMessage{
+			_ = c.write(&protocolv1.WireMessage{
 				Version: protocol.ProtocolVersion,
-				Body: &protocol.WireMessage_Error{
-					Error: &protocol.ProtocolError{Code: 400, Message: "unsupported message type"},
+				Body: &protocolv1.WireMessage_Error{
+					Error: &protocolv1.ProtocolError{Code: 400, Message: "unsupported message type"},
 				},
 			})
 		}

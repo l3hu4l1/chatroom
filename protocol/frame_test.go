@@ -7,6 +7,7 @@ import (
 	"io"
 	"testing"
 
+	protocolv1 "github.com/l3hu4l1/chatroom/protocol/v1"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -35,10 +36,10 @@ func (r *chunkedReader) Read(p []byte) (int, error) {
 }
 
 func TestReadWireMessageHandlesPartialReads(t *testing.T) {
-	original := &WireMessage{
+	original := &protocolv1.WireMessage{
 		Version: ProtocolVersion,
-		Body: &WireMessage_ClientMessage{
-			ClientMessage: &ClientMessage{Text: "hello world", Room: "general"},
+		Body: &protocolv1.WireMessage_ClientMessage{
+			ClientMessage: &protocolv1.ClientMessage{Text: "hello world", Room: "general"},
 		},
 	}
 

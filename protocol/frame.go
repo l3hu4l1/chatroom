@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 
+	protocolv1 "github.com/l3hu4l1/chatroom/protocol/v1"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -17,7 +18,7 @@ const (
 var ErrFrameTooLarge = errors.New("protocol frame too large")
 var ErrEmptyPayload = errors.New("empty protobuf payload")
 
-func WriteWireMessage(w io.Writer, message *WireMessage) error {
+func WriteWireMessage(w io.Writer, message *protocolv1.WireMessage) error {
 	payload, err := proto.Marshal(message)
 	if err != nil {
 		return err
@@ -55,7 +56,7 @@ func writeFull(w io.Writer, p []byte) error {
 	return nil
 }
 
-func ReadWireMessage(r io.Reader) (*WireMessage, error) {
+func ReadWireMessage(r io.Reader) (*protocolv1.WireMessage, error) {
 	var header [4]byte
 	if _, err := io.ReadFull(r, header[:]); err != nil {
 		return nil, err
@@ -69,12 +70,12 @@ func ReadWireMessage(r io.Reader) (*WireMessage, error) {
 		return nil, fmt.Errorf("%w: %d bytes", ErrFrameTooLarge, frameSize)
 	}
 
-payload := make([]byte, int(frameSize))
+	payload := make([]byte, int(frameSize))
 	if _, err := io.ReadFull(r, payload); err != nil {
 		return nil, err
 	}
 
-	message := &WireMessage{}
+	message := &protocolv1.WireMessage{}
 	if err := proto.Unmarshal(payload, message); err != nil {
 		return nil, err
 	}
