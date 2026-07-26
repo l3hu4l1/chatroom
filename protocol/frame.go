@@ -32,12 +32,26 @@ func WriteWireMessage(w io.Writer, message *WireMessage) error {
 	var header [4]byte
 	binary.BigEndian.PutUint32(header[:], uint32(len(payload)))
 
-	if _, err := w.Write(header[:]); err != nil {
+	if err := writeFull(w, header[:]); err != nil {
 		return err
 	}
 
-	_, err = w.Write(payload)
-	return err
+	return writeFull(w, payload)
+}
+
+func writeFull(w io.Writer, p []byte) error {
+	for len(p) > 0 {
+		n, err := w.Write(p)
+		if err != nil {
+			return err
+		}
+		if n == 0 {
+			return io.ErrShortWrite
+		}
+		p = p[n:]
+	}
+
+	return nil
 }
 
 func ReadWireMessage(r io.Reader) (*WireMessage, error) {
