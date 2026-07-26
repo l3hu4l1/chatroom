@@ -15,6 +15,7 @@ const (
 )
 
 var ErrFrameTooLarge = errors.New("protocol frame too large")
+var ErrEmptyPayload = errors.New("empty protobuf payload")
 
 func WriteWireMessage(w io.Writer, message *WireMessage) error {
 	payload, err := proto.Marshal(message)
@@ -23,7 +24,7 @@ func WriteWireMessage(w io.Writer, message *WireMessage) error {
 	}
 
 	if len(payload) == 0 {
-		return fmt.Errorf("%w: empty payload", ErrFrameTooLarge)
+		return ErrEmptyPayload
 	}
 	if len(payload) > MaxFrameSize {
 		return fmt.Errorf("%w: %d bytes", ErrFrameTooLarge, len(payload))
