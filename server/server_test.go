@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/l3hu4l1/chatroom/protocol"
+	protocolv1 "github.com/l3hu4l1/chatroom/protocol/v1"
 )
 
 func resetHubForTest() {
@@ -29,10 +30,10 @@ func waitForCondition(t *testing.T, deadline time.Duration, condition func() boo
 func sendHello(t *testing.T, conn net.Conn, nickname string) {
 	t.Helper()
 
-	if err := protocol.WriteWireMessage(conn, &protocol.WireMessage{
+	if err := protocol.WriteWireMessage(conn, &protocolv1.WireMessage{
 		Version: protocol.ProtocolVersion,
-		Body: &protocol.WireMessage_ClientHello{
-			ClientHello: &protocol.ClientHello{Nickname: nickname},
+		Body: &protocolv1.WireMessage_ClientHello{
+			ClientHello: &protocolv1.ClientHello{Nickname: nickname},
 		},
 	}); err != nil {
 		t.Fatalf("write hello: %v", err)
@@ -95,10 +96,10 @@ func TestBroadcastFansOutToOtherClients(t *testing.T) {
 	sendHello(t, receiverOneClient, "receiver-one")
 	sendHello(t, receiverTwoClient, "receiver-two")
 
-	if err := protocol.WriteWireMessage(senderClient, &protocol.WireMessage{
+	if err := protocol.WriteWireMessage(senderClient, &protocolv1.WireMessage{
 		Version: protocol.ProtocolVersion,
-		Body: &protocol.WireMessage_ClientMessage{
-			ClientMessage: &protocol.ClientMessage{Text: "hello everyone"},
+		Body: &protocolv1.WireMessage_ClientMessage{
+			ClientMessage: &protocolv1.ClientMessage{Text: "hello everyone"},
 		},
 	}); err != nil {
 		t.Fatalf("write chat message: %v", err)

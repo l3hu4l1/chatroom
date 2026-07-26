@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v5.29.3
-// source: protocol/conn.proto
+// source: protocol/v1/conn.proto
 
-package protocol
+package protocolv1
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -40,7 +40,7 @@ type WireMessage struct {
 
 func (x *WireMessage) Reset() {
 	*x = WireMessage{}
-	mi := &file_protocol_conn_proto_msgTypes[0]
+	mi := &file_protocol_v1_conn_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -52,7 +52,7 @@ func (x *WireMessage) String() string {
 func (*WireMessage) ProtoMessage() {}
 
 func (x *WireMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_protocol_conn_proto_msgTypes[0]
+	mi := &file_protocol_v1_conn_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -65,7 +65,7 @@ func (x *WireMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WireMessage.ProtoReflect.Descriptor instead.
 func (*WireMessage) Descriptor() ([]byte, []int) {
-	return file_protocol_conn_proto_rawDescGZIP(), []int{0}
+	return file_protocol_v1_conn_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *WireMessage) GetVersion() uint32 {
@@ -200,7 +200,7 @@ type ClientHello struct {
 
 func (x *ClientHello) Reset() {
 	*x = ClientHello{}
-	mi := &file_protocol_conn_proto_msgTypes[1]
+	mi := &file_protocol_v1_conn_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -212,7 +212,7 @@ func (x *ClientHello) String() string {
 func (*ClientHello) ProtoMessage() {}
 
 func (x *ClientHello) ProtoReflect() protoreflect.Message {
-	mi := &file_protocol_conn_proto_msgTypes[1]
+	mi := &file_protocol_v1_conn_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -225,7 +225,7 @@ func (x *ClientHello) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClientHello.ProtoReflect.Descriptor instead.
 func (*ClientHello) Descriptor() ([]byte, []int) {
-	return file_protocol_conn_proto_rawDescGZIP(), []int{1}
+	return file_protocol_v1_conn_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ClientHello) GetNickname() string {
@@ -245,7 +245,7 @@ type ClientMessage struct {
 
 func (x *ClientMessage) Reset() {
 	*x = ClientMessage{}
-	mi := &file_protocol_conn_proto_msgTypes[2]
+	mi := &file_protocol_v1_conn_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -257,7 +257,7 @@ func (x *ClientMessage) String() string {
 func (*ClientMessage) ProtoMessage() {}
 
 func (x *ClientMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_protocol_conn_proto_msgTypes[2]
+	mi := &file_protocol_v1_conn_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -270,7 +270,7 @@ func (x *ClientMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClientMessage.ProtoReflect.Descriptor instead.
 func (*ClientMessage) Descriptor() ([]byte, []int) {
-	return file_protocol_conn_proto_rawDescGZIP(), []int{2}
+	return file_protocol_v1_conn_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ClientMessage) GetText() string {
@@ -297,7 +297,7 @@ type ServerWelcome struct {
 
 func (x *ServerWelcome) Reset() {
 	*x = ServerWelcome{}
-	mi := &file_protocol_conn_proto_msgTypes[3]
+	mi := &file_protocol_v1_conn_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -309,7 +309,7 @@ func (x *ServerWelcome) String() string {
 func (*ServerWelcome) ProtoMessage() {}
 
 func (x *ServerWelcome) ProtoReflect() protoreflect.Message {
-	mi := &file_protocol_conn_proto_msgTypes[3]
+	mi := &file_protocol_v1_conn_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -322,7 +322,7 @@ func (x *ServerWelcome) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerWelcome.ProtoReflect.Descriptor instead.
 func (*ServerWelcome) Descriptor() ([]byte, []int) {
-	return file_protocol_conn_proto_rawDescGZIP(), []int{3}
+	return file_protocol_v1_conn_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ServerWelcome) GetConnectionId() uint64 {
@@ -350,7 +350,7 @@ type ServerEvent struct {
 
 func (x *ServerEvent) Reset() {
 	*x = ServerEvent{}
-	mi := &file_protocol_conn_proto_msgTypes[4]
+	mi := &file_protocol_v1_conn_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -362,7 +362,7 @@ func (x *ServerEvent) String() string {
 func (*ServerEvent) ProtoMessage() {}
 
 func (x *ServerEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_protocol_conn_proto_msgTypes[4]
+	mi := &file_protocol_v1_conn_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -375,7 +375,7 @@ func (x *ServerEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerEvent.ProtoReflect.Descriptor instead.
 func (*ServerEvent) Descriptor() ([]byte, []int) {
-	return file_protocol_conn_proto_rawDescGZIP(), []int{4}
+	return file_protocol_v1_conn_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ServerEvent) GetSender() string {
@@ -408,7 +408,7 @@ type Ping struct {
 
 func (x *Ping) Reset() {
 	*x = Ping{}
-	mi := &file_protocol_conn_proto_msgTypes[5]
+	mi := &file_protocol_v1_conn_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -420,7 +420,7 @@ func (x *Ping) String() string {
 func (*Ping) ProtoMessage() {}
 
 func (x *Ping) ProtoReflect() protoreflect.Message {
-	mi := &file_protocol_conn_proto_msgTypes[5]
+	mi := &file_protocol_v1_conn_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -433,7 +433,7 @@ func (x *Ping) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Ping.ProtoReflect.Descriptor instead.
 func (*Ping) Descriptor() ([]byte, []int) {
-	return file_protocol_conn_proto_rawDescGZIP(), []int{5}
+	return file_protocol_v1_conn_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *Ping) GetSentAtUnixMs() uint64 {
@@ -452,7 +452,7 @@ type Pong struct {
 
 func (x *Pong) Reset() {
 	*x = Pong{}
-	mi := &file_protocol_conn_proto_msgTypes[6]
+	mi := &file_protocol_v1_conn_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -464,7 +464,7 @@ func (x *Pong) String() string {
 func (*Pong) ProtoMessage() {}
 
 func (x *Pong) ProtoReflect() protoreflect.Message {
-	mi := &file_protocol_conn_proto_msgTypes[6]
+	mi := &file_protocol_v1_conn_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -477,7 +477,7 @@ func (x *Pong) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Pong.ProtoReflect.Descriptor instead.
 func (*Pong) Descriptor() ([]byte, []int) {
-	return file_protocol_conn_proto_rawDescGZIP(), []int{6}
+	return file_protocol_v1_conn_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *Pong) GetSentAtUnixMs() uint64 {
@@ -497,7 +497,7 @@ type ProtocolError struct {
 
 func (x *ProtocolError) Reset() {
 	*x = ProtocolError{}
-	mi := &file_protocol_conn_proto_msgTypes[7]
+	mi := &file_protocol_v1_conn_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -509,7 +509,7 @@ func (x *ProtocolError) String() string {
 func (*ProtocolError) ProtoMessage() {}
 
 func (x *ProtocolError) ProtoReflect() protoreflect.Message {
-	mi := &file_protocol_conn_proto_msgTypes[7]
+	mi := &file_protocol_v1_conn_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -522,7 +522,7 @@ func (x *ProtocolError) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProtocolError.ProtoReflect.Descriptor instead.
 func (*ProtocolError) Descriptor() ([]byte, []int) {
-	return file_protocol_conn_proto_rawDescGZIP(), []int{7}
+	return file_protocol_v1_conn_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ProtocolError) GetCode() uint32 {
@@ -539,20 +539,20 @@ func (x *ProtocolError) GetMessage() string {
 	return ""
 }
 
-var File_protocol_conn_proto protoreflect.FileDescriptor
+var File_protocol_v1_conn_proto protoreflect.FileDescriptor
 
-const file_protocol_conn_proto_rawDesc = "" +
+const file_protocol_v1_conn_proto_rawDesc = "" +
 	"\n" +
-	"\x13protocol/conn.proto\x12\bprotocol\"\xa8\x03\n" +
+	"\x16protocol/v1/conn.proto\x12\vprotocol.v1\"\xbd\x03\n" +
 	"\vWireMessage\x12\x18\n" +
-	"\aversion\x18\x01 \x01(\rR\aversion\x12:\n" +
-	"\fclient_hello\x18\x02 \x01(\v2\x15.protocol.ClientHelloH\x00R\vclientHello\x12@\n" +
-	"\x0eclient_message\x18\x03 \x01(\v2\x17.protocol.ClientMessageH\x00R\rclientMessage\x12@\n" +
-	"\x0eserver_welcome\x18\x04 \x01(\v2\x17.protocol.ServerWelcomeH\x00R\rserverWelcome\x12:\n" +
-	"\fserver_event\x18\x05 \x01(\v2\x15.protocol.ServerEventH\x00R\vserverEvent\x12$\n" +
-	"\x04ping\x18\x06 \x01(\v2\x0e.protocol.PingH\x00R\x04ping\x12$\n" +
-	"\x04pong\x18\a \x01(\v2\x0e.protocol.PongH\x00R\x04pong\x12/\n" +
-	"\x05error\x18\b \x01(\v2\x17.protocol.ProtocolErrorH\x00R\x05errorB\x06\n" +
+	"\aversion\x18\x01 \x01(\rR\aversion\x12=\n" +
+	"\fclient_hello\x18\x02 \x01(\v2\x18.protocol.v1.ClientHelloH\x00R\vclientHello\x12C\n" +
+	"\x0eclient_message\x18\x03 \x01(\v2\x1a.protocol.v1.ClientMessageH\x00R\rclientMessage\x12C\n" +
+	"\x0eserver_welcome\x18\x04 \x01(\v2\x1a.protocol.v1.ServerWelcomeH\x00R\rserverWelcome\x12=\n" +
+	"\fserver_event\x18\x05 \x01(\v2\x18.protocol.v1.ServerEventH\x00R\vserverEvent\x12'\n" +
+	"\x04ping\x18\x06 \x01(\v2\x11.protocol.v1.PingH\x00R\x04ping\x12'\n" +
+	"\x04pong\x18\a \x01(\v2\x11.protocol.v1.PongH\x00R\x04pong\x122\n" +
+	"\x05error\x18\b \x01(\v2\x1a.protocol.v1.ProtocolErrorH\x00R\x05errorB\x06\n" +
 	"\x04body\")\n" +
 	"\vClientHello\x12\x1a\n" +
 	"\bnickname\x18\x01 \x01(\tR\bnickname\"7\n" +
@@ -572,39 +572,39 @@ const file_protocol_conn_proto_rawDesc = "" +
 	"\x0fsent_at_unix_ms\x18\x01 \x01(\x04R\fsentAtUnixMs\"=\n" +
 	"\rProtocolError\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\rR\x04code\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessageB/Z-github.com/l3hu4l1/chatroom/protocol;protocolb\x06proto3"
+	"\amessage\x18\x02 \x01(\tR\amessageB4Z2github.com/l3hu4l1/chatroom/protocol/v1;protocolv1b\x06proto3"
 
 var (
-	file_protocol_conn_proto_rawDescOnce sync.Once
-	file_protocol_conn_proto_rawDescData []byte
+	file_protocol_v1_conn_proto_rawDescOnce sync.Once
+	file_protocol_v1_conn_proto_rawDescData []byte
 )
 
-func file_protocol_conn_proto_rawDescGZIP() []byte {
-	file_protocol_conn_proto_rawDescOnce.Do(func() {
-		file_protocol_conn_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_protocol_conn_proto_rawDesc), len(file_protocol_conn_proto_rawDesc)))
+func file_protocol_v1_conn_proto_rawDescGZIP() []byte {
+	file_protocol_v1_conn_proto_rawDescOnce.Do(func() {
+		file_protocol_v1_conn_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_protocol_v1_conn_proto_rawDesc), len(file_protocol_v1_conn_proto_rawDesc)))
 	})
-	return file_protocol_conn_proto_rawDescData
+	return file_protocol_v1_conn_proto_rawDescData
 }
 
-var file_protocol_conn_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
-var file_protocol_conn_proto_goTypes = []any{
-	(*WireMessage)(nil),   // 0: protocol.WireMessage
-	(*ClientHello)(nil),   // 1: protocol.ClientHello
-	(*ClientMessage)(nil), // 2: protocol.ClientMessage
-	(*ServerWelcome)(nil), // 3: protocol.ServerWelcome
-	(*ServerEvent)(nil),   // 4: protocol.ServerEvent
-	(*Ping)(nil),          // 5: protocol.Ping
-	(*Pong)(nil),          // 6: protocol.Pong
-	(*ProtocolError)(nil), // 7: protocol.ProtocolError
+var file_protocol_v1_conn_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_protocol_v1_conn_proto_goTypes = []any{
+	(*WireMessage)(nil),   // 0: protocol.v1.WireMessage
+	(*ClientHello)(nil),   // 1: protocol.v1.ClientHello
+	(*ClientMessage)(nil), // 2: protocol.v1.ClientMessage
+	(*ServerWelcome)(nil), // 3: protocol.v1.ServerWelcome
+	(*ServerEvent)(nil),   // 4: protocol.v1.ServerEvent
+	(*Ping)(nil),          // 5: protocol.v1.Ping
+	(*Pong)(nil),          // 6: protocol.v1.Pong
+	(*ProtocolError)(nil), // 7: protocol.v1.ProtocolError
 }
-var file_protocol_conn_proto_depIdxs = []int32{
-	1, // 0: protocol.WireMessage.client_hello:type_name -> protocol.ClientHello
-	2, // 1: protocol.WireMessage.client_message:type_name -> protocol.ClientMessage
-	3, // 2: protocol.WireMessage.server_welcome:type_name -> protocol.ServerWelcome
-	4, // 3: protocol.WireMessage.server_event:type_name -> protocol.ServerEvent
-	5, // 4: protocol.WireMessage.ping:type_name -> protocol.Ping
-	6, // 5: protocol.WireMessage.pong:type_name -> protocol.Pong
-	7, // 6: protocol.WireMessage.error:type_name -> protocol.ProtocolError
+var file_protocol_v1_conn_proto_depIdxs = []int32{
+	1, // 0: protocol.v1.WireMessage.client_hello:type_name -> protocol.v1.ClientHello
+	2, // 1: protocol.v1.WireMessage.client_message:type_name -> protocol.v1.ClientMessage
+	3, // 2: protocol.v1.WireMessage.server_welcome:type_name -> protocol.v1.ServerWelcome
+	4, // 3: protocol.v1.WireMessage.server_event:type_name -> protocol.v1.ServerEvent
+	5, // 4: protocol.v1.WireMessage.ping:type_name -> protocol.v1.Ping
+	6, // 5: protocol.v1.WireMessage.pong:type_name -> protocol.v1.Pong
+	7, // 6: protocol.v1.WireMessage.error:type_name -> protocol.v1.ProtocolError
 	7, // [7:7] is the sub-list for method output_type
 	7, // [7:7] is the sub-list for method input_type
 	7, // [7:7] is the sub-list for extension type_name
@@ -612,12 +612,12 @@ var file_protocol_conn_proto_depIdxs = []int32{
 	0, // [0:7] is the sub-list for field type_name
 }
 
-func init() { file_protocol_conn_proto_init() }
-func file_protocol_conn_proto_init() {
-	if File_protocol_conn_proto != nil {
+func init() { file_protocol_v1_conn_proto_init() }
+func file_protocol_v1_conn_proto_init() {
+	if File_protocol_v1_conn_proto != nil {
 		return
 	}
-	file_protocol_conn_proto_msgTypes[0].OneofWrappers = []any{
+	file_protocol_v1_conn_proto_msgTypes[0].OneofWrappers = []any{
 		(*WireMessage_ClientHello)(nil),
 		(*WireMessage_ClientMessage)(nil),
 		(*WireMessage_ServerWelcome)(nil),
@@ -630,17 +630,17 @@ func file_protocol_conn_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protocol_conn_proto_rawDesc), len(file_protocol_conn_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protocol_v1_conn_proto_rawDesc), len(file_protocol_v1_conn_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_protocol_conn_proto_goTypes,
-		DependencyIndexes: file_protocol_conn_proto_depIdxs,
-		MessageInfos:      file_protocol_conn_proto_msgTypes,
+		GoTypes:           file_protocol_v1_conn_proto_goTypes,
+		DependencyIndexes: file_protocol_v1_conn_proto_depIdxs,
+		MessageInfos:      file_protocol_v1_conn_proto_msgTypes,
 	}.Build()
-	File_protocol_conn_proto = out.File
-	file_protocol_conn_proto_goTypes = nil
-	file_protocol_conn_proto_depIdxs = nil
+	File_protocol_v1_conn_proto = out.File
+	file_protocol_v1_conn_proto_goTypes = nil
+	file_protocol_v1_conn_proto_depIdxs = nil
 }
