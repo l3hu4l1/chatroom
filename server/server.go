@@ -26,6 +26,13 @@ type chatHub struct {
 	nextID  uint64
 }
 
+type serverMetrics struct {
+	connects             uint64
+	disconnects          uint64
+	broadcasts           uint64
+	queueFullDisconnects uint64
+}
+
 var hub = &chatHub{clients: make(map[uint64]*client)}
 
 const outboundQueueSize = 64
