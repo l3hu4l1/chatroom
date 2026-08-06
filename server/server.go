@@ -34,6 +34,7 @@ type serverMetrics struct {
 }
 
 var hub = &chatHub{clients: make(map[uint64]*client)}
+var metrics serverMetrics
 
 const outboundQueueSize = 64
 
@@ -75,6 +76,7 @@ func (h *chatHub) add(conn net.Conn) *client {
 	}
 	h.clients[c.id] = c
 	c.startWriter()
+	atomic.AddUint64(&metrics.connects, 1)
 	return c
 }
 
@@ -87,6 +89,7 @@ func (h *chatHub) remove(id uint64) {
 	h.mu.Unlock()
 
 	if ok {
+		atomic.AddUint64(&metrics.disconnects, 1)
 		c.close()
 	}
 }
@@ -238,6 +241,8 @@ func handleConnection(c *client) {
 					hub.remove(target.id)
 				}
 			}
+
+			atomic.AddUint64(&metrics.broadcasts, 1)
 
 			fmt.Printf("%s: %s\n", nickname, text)
 
