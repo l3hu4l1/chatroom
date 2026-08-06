@@ -156,3 +156,60 @@ func TestEnqueueFailsAfterClientRemoval(t *testing.T) {
 		t.Fatal("expected enqueue to fail after client removal")
 	}
 }
+
+func TestEnqueueReturnsQueueFullWhenOutboundBufferIsFull(t *testing.T) {
+	c := &client{
+		id:       1,
+		outbound: make(chan *protocolv1.WireMessage, 1),
+		done:     make(chan struct{}),
+	}
+
+	first := &protocolv1.WireMessage{Version: protocol.ProtocolVersion}
+	second := &protocolv1.WireMessage{Version: protocol.ProtocolVersion}
+
+	if err := c.enqueue(first); err != nil {
+		t.Fatalf("first enqueue failed: %v", err)
+	}
+
+	err := c.enqueue(second)
+	if err == nil {
+		t.Fatal("expected queue-full error on second enqueue")
+	}
+	if !errors.Is(err, errOutboundQueueFull) {
+		t.Fatalf("error = %v, want errOutboundQueueFull", err)
+	}
+}
+
+	if err := protocol.WriteWireMessage(senderClient, &protocolv1.WireMessage{
+		Version: protocol.ProtocolVersion,
+		Body: &protocolv1.WireMessage_ClientMessage{
+			ClientMessage: &protocolv1.ClientMessage{Text: "hello healthy client"},
+		},
+	}); err != nil {
+		t.Fatalf("write chat message: %v", err)
+	}
+
+	waitForCondition(t, time.Second, func() bool {
+		hub.mu.RLock()
+		defer hub.mu.RUnlock()
+		_, slowPresent := hub.clients[slow.id]
+		_, fastPresent := hub.clients[fast.id]
+		return !slowPresent && fastPresent
+	})
+
+	message, err := protocol.ReadWireMessage(fastClient)
+	if err != nil {
+		t.Fatalf("read fast client message: %v", err)
+	}
+	event := message.GetServerEvent()
+	if event == nil {
+		t.Fatalf("expected server event for fast client, got %#v", message.GetBody())
+	}
+	if got := event.GetText(); got != "hello healthy client" {
+		t.Fatalf("fast client text = %q, want %q", got, "hello healthy client")
+	}
+
+	if got := atomic.LoadUint64(&metrics.queueFullDisconnects); got == 0 {
+		t.Fatal("expected queue-full disconnect metric to increment")
+	}
+}
