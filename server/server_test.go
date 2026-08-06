@@ -180,6 +180,43 @@ func TestEnqueueReturnsQueueFullWhenOutboundBufferIsFull(t *testing.T) {
 	}
 }
 
+func TestBroadcastRemovesSlowClientWhenQueueIsFull(t *testing.T) {
+	resetHubForTest()
+
+	senderServer, senderClient := net.Pipe()
+	slowServer, slowClient := net.Pipe()
+	fastServer, fastClient := net.Pipe()
+	defer senderClient.Close()
+	defer slowClient.Close()
+	defer fastClient.Close()
+
+	sender := hub.add(senderServer)
+	slow := hub.add(slowServer)
+	fast := hub.add(fastServer)
+
+	go handleConnection(sender)
+	go handleConnection(fast)
+
+	sendHello(t, senderClient, "sender")
+	sendHello(t, fastClient, "fast")
+
+	// Fill slow client's queue so the next broadcast enqueue hits queue-full.
+	for {
+		err := slow.enqueue(&protocolv1.WireMessage{
+			Version: protocol.ProtocolVersion,
+			Body: &protocolv1.WireMessage_ServerEvent{
+				ServerEvent: &protocolv1.ServerEvent{Sender: "server", Text: "backpressure"},
+			},
+		})
+		if err == nil {
+			continue
+		}
+		if errors.Is(err, errOutboundQueueFull) {
+			break
+		}
+		t.Fatalf("unexpected enqueue error while filling slow queue: %v", err)
+	}
+
 	if err := protocol.WriteWireMessage(senderClient, &protocolv1.WireMessage{
 		Version: protocol.ProtocolVersion,
 		Body: &protocolv1.WireMessage_ClientMessage{
