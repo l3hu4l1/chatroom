@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"net"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 
 func resetHubForTest() {
 	hub = &chatHub{clients: make(map[uint64]*client)}
+	metrics = serverMetrics{}
 }
 
 func waitForCondition(t *testing.T, deadline time.Duration, condition func() bool) {
