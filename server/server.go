@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"sync"
@@ -26,6 +27,11 @@ type chatHub struct {
 }
 
 var hub = &chatHub{clients: make(map[uint64]*client)}
+
+const outboundQueueSize = 64
+
+var errClientClosed = errors.New("client closed")
+var errOutboundQueueFull = errors.New("client outbound queue full")
 
 func main() {
 	listener, err := net.Listen("tcp", ":8080")
@@ -74,7 +80,7 @@ func (h *chatHub) remove(id uint64) {
 	h.mu.Unlock()
 
 	if ok {
-		_ = c.conn.Close()
+		c.close()
 	}
 }
 
@@ -126,6 +132,12 @@ func (c *client) enqueue(message *protocolv1.WireMessage) (err error) {
 	}
 }
 
+func (c *client) close() {
+	c.closeOnce.Do(func() {
+		close(c.done)
+		close(c.outbound)
+		_ = c.conn.Close()
+	})
 }
 
 func handleConnection(c *client) {
@@ -145,7 +157,9 @@ func handleConnection(c *client) {
 				Body: &protocolv1.WireMessage_Error{
 					Error: &protocolv1.ProtocolError{Code: 400, Message: "unsupported protocol version"},
 				},
-			})
+			}); err != nil {
+				fmt.Println("Error sending protocol version error:", err)
+			}
 			return
 		}
 
