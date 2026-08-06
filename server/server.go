@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/l3hu4l1/chatroom/protocol"
@@ -11,9 +12,11 @@ import (
 )
 
 type client struct {
-	id      uint64
-	conn    net.Conn
-	writeMu sync.Mutex
+	id        uint64
+	conn      net.Conn
+	outbound  chan *protocolv1.WireMessage
+	done      chan struct{}
+	closeOnce sync.Once
 }
 
 type chatHub struct {
