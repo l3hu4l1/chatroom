@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net"
 	"testing"
 	"time"
@@ -133,5 +134,25 @@ func TestBroadcastFansOutToOtherClients(t *testing.T) {
 	}
 	if got := eventTwo.GetText(); got != "hello everyone" {
 		t.Fatalf("receiver two text = %q, want %q", got, "hello everyone")
+	}
+}
+
+func TestEnqueueFailsAfterClientRemoval(t *testing.T) {
+	resetHubForTest()
+
+	serverConn, clientConn := net.Pipe()
+	defer clientConn.Close()
+
+	client := hub.add(serverConn)
+	hub.remove(client.id)
+
+	err := client.enqueue(&protocolv1.WireMessage{
+		Version: protocol.ProtocolVersion,
+		Body: &protocolv1.WireMessage_Ping{
+			Ping: &protocolv1.Ping{SentAtUnixMs: 1},
+		},
+	})
+	if err == nil {
+		t.Fatal("expected enqueue to fail after client removal")
 	}
 }
