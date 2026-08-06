@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/l3hu4l1/chatroom/protocol"
@@ -11,9 +13,11 @@ import (
 )
 
 type client struct {
-	id      uint64
-	conn    net.Conn
-	writeMu sync.Mutex
+	id        uint64
+	conn      net.Conn
+	outbound  chan *protocolv1.WireMessage
+	done      chan struct{}
+	closeOnce sync.Once
 }
 
 type chatHub struct {
@@ -22,7 +26,20 @@ type chatHub struct {
 	nextID  uint64
 }
 
+type serverMetrics struct {
+	connects             uint64
+	disconnects          uint64
+	broadcasts           uint64
+	queueFullDisconnects uint64
+}
+
 var hub = &chatHub{clients: make(map[uint64]*client)}
+var metrics serverMetrics
+
+const outboundQueueSize = 64
+
+var errClientClosed = errors.New("client closed")
+var errOutboundQueueFull = errors.New("client outbound queue full")
 
 func main() {
 	listener, err := net.Listen("tcp", ":8080")
@@ -51,8 +68,15 @@ func (h *chatHub) add(conn net.Conn) *client {
 	defer h.mu.Unlock()
 
 	h.nextID++
-	c := &client{id: h.nextID, conn: conn}
+	c := &client{
+		id:       h.nextID,
+		conn:     conn,
+		outbound: make(chan *protocolv1.WireMessage, outboundQueueSize),
+		done:     make(chan struct{}),
+	}
 	h.clients[c.id] = c
+	c.startWriter()
+	atomic.AddUint64(&metrics.connects, 1)
 	return c
 }
 
@@ -65,7 +89,8 @@ func (h *chatHub) remove(id uint64) {
 	h.mu.Unlock()
 
 	if ok {
-		_ = c.conn.Close()
+		atomic.AddUint64(&metrics.disconnects, 1)
+		c.close()
 	}
 }
 
@@ -83,11 +108,46 @@ func (h *chatHub) snapshotExcept(skipID uint64) []*client {
 	return clients
 }
 
-func (c *client) write(message *protocolv1.WireMessage) error {
-	c.writeMu.Lock()
-	defer c.writeMu.Unlock()
+func (c *client) startWriter() {
+	go func() {
+		for message := range c.outbound {
+			if err := protocol.WriteWireMessage(c.conn, message); err != nil {
+				c.close()
+				return
+			}
+		}
+	}()
+}
 
-	return protocol.WriteWireMessage(c.conn, message)
+func (c *client) enqueue(message *protocolv1.WireMessage) (err error) {
+	select {
+	case <-c.done:
+		return errClientClosed
+	default:
+	}
+
+	defer func() {
+		if recover() != nil {
+			err = errClientClosed
+		}
+	}()
+
+	select {
+	case <-c.done:
+		return errClientClosed
+	case c.outbound <- message:
+		return nil
+	default:
+		return errOutboundQueueFull
+	}
+}
+
+func (c *client) close() {
+	c.closeOnce.Do(func() {
+		close(c.done)
+		close(c.outbound)
+		_ = c.conn.Close()
+	})
 }
 
 func handleConnection(c *client) {
@@ -102,12 +162,14 @@ func handleConnection(c *client) {
 		}
 
 		if message.GetVersion() != protocol.ProtocolVersion {
-			_ = c.write(&protocolv1.WireMessage{
+			if err := c.enqueue(&protocolv1.WireMessage{
 				Version: protocol.ProtocolVersion,
 				Body: &protocolv1.WireMessage_Error{
 					Error: &protocolv1.ProtocolError{Code: 400, Message: "unsupported protocol version"},
 				},
-			})
+			}); err != nil {
+				fmt.Println("Error sending protocol version error:", err)
+			}
 			return
 		}
 
@@ -115,16 +177,18 @@ func handleConnection(c *client) {
 		case *protocolv1.WireMessage_ClientHello:
 			nickname = body.ClientHello.GetNickname()
 			if nickname == "" {
-				_ = c.write(&protocolv1.WireMessage{
+				if err := c.enqueue(&protocolv1.WireMessage{
 					Version: protocol.ProtocolVersion,
 					Body: &protocolv1.WireMessage_Error{
 						Error: &protocolv1.ProtocolError{Code: 400, Message: "nickname cannot be empty"},
 					},
-				})
+				}); err != nil {
+					fmt.Println("Error sending nickname validation error:", err)
+				}
 				return
 			}
 
-			if err := c.write(&protocolv1.WireMessage{
+			if err := c.enqueue(&protocolv1.WireMessage{
 				Version: protocol.ProtocolVersion,
 				Body: &protocolv1.WireMessage_ServerWelcome{
 					ServerWelcome: &protocolv1.ServerWelcome{ConnectionId: c.id, Nickname: nickname},
@@ -138,12 +202,15 @@ func handleConnection(c *client) {
 
 		case *protocolv1.WireMessage_ClientMessage:
 			if nickname == "" {
-				_ = c.write(&protocolv1.WireMessage{
+				if err := c.enqueue(&protocolv1.WireMessage{
 					Version: protocol.ProtocolVersion,
 					Body: &protocolv1.WireMessage_Error{
 						Error: &protocolv1.ProtocolError{Code: 400, Message: "hello required before chat messages"},
 					},
-				})
+				}); err != nil {
+					fmt.Println("Error sending pre-hello validation error:", err)
+					return
+				}
 				continue
 			}
 
@@ -164,16 +231,23 @@ func handleConnection(c *client) {
 			}
 
 			for _, target := range hub.snapshotExcept(c.id) {
-				if err := target.write(broadcast); err != nil {
-					fmt.Println("Error writing to connection:", err)
+				if err := target.enqueue(broadcast); err != nil {
+					if errors.Is(err, errOutboundQueueFull) {
+						atomic.AddUint64(&metrics.queueFullDisconnects, 1)
+						fmt.Println("Disconnecting slow client due to full outbound queue:", target.id)
+					} else {
+						fmt.Println("Error writing to connection:", err)
+					}
 					hub.remove(target.id)
 				}
 			}
 
+			atomic.AddUint64(&metrics.broadcasts, 1)
+
 			fmt.Printf("%s: %s\n", nickname, text)
 
 		case *protocolv1.WireMessage_Ping:
-			if err := c.write(&protocolv1.WireMessage{
+			if err := c.enqueue(&protocolv1.WireMessage{
 				Version: protocol.ProtocolVersion,
 				Body: &protocolv1.WireMessage_Pong{
 					Pong: &protocolv1.Pong{SentAtUnixMs: body.Ping.GetSentAtUnixMs()},
@@ -184,12 +258,15 @@ func handleConnection(c *client) {
 			}
 
 		default:
-			_ = c.write(&protocolv1.WireMessage{
+			if err := c.enqueue(&protocolv1.WireMessage{
 				Version: protocol.ProtocolVersion,
 				Body: &protocolv1.WireMessage_Error{
 					Error: &protocolv1.ProtocolError{Code: 400, Message: "unsupported message type"},
 				},
-			})
+			}); err != nil {
+				fmt.Println("Error sending unsupported message type error:", err)
+				return
+			}
 		}
 	}
 }

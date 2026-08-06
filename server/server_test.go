@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"net"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -11,6 +13,7 @@ import (
 
 func resetHubForTest() {
 	hub = &chatHub{clients: make(map[uint64]*client)}
+	metrics = serverMetrics{}
 }
 
 func waitForCondition(t *testing.T, deadline time.Duration, condition func() bool) {
@@ -133,5 +136,119 @@ func TestBroadcastFansOutToOtherClients(t *testing.T) {
 	}
 	if got := eventTwo.GetText(); got != "hello everyone" {
 		t.Fatalf("receiver two text = %q, want %q", got, "hello everyone")
+	}
+}
+
+func TestEnqueueFailsAfterClientRemoval(t *testing.T) {
+	resetHubForTest()
+
+	serverConn, clientConn := net.Pipe()
+	defer clientConn.Close()
+
+	client := hub.add(serverConn)
+	hub.remove(client.id)
+
+	err := client.enqueue(&protocolv1.WireMessage{
+		Version: protocol.ProtocolVersion,
+		Body: &protocolv1.WireMessage_Ping{
+			Ping: &protocolv1.Ping{SentAtUnixMs: 1},
+		},
+	})
+	if err == nil {
+		t.Fatal("expected enqueue to fail after client removal")
+	}
+}
+
+func TestEnqueueReturnsQueueFullWhenOutboundBufferIsFull(t *testing.T) {
+	c := &client{
+		id:       1,
+		outbound: make(chan *protocolv1.WireMessage, 1),
+		done:     make(chan struct{}),
+	}
+
+	first := &protocolv1.WireMessage{Version: protocol.ProtocolVersion}
+	second := &protocolv1.WireMessage{Version: protocol.ProtocolVersion}
+
+	if err := c.enqueue(first); err != nil {
+		t.Fatalf("first enqueue failed: %v", err)
+	}
+
+	err := c.enqueue(second)
+	if err == nil {
+		t.Fatal("expected queue-full error on second enqueue")
+	}
+	if !errors.Is(err, errOutboundQueueFull) {
+		t.Fatalf("error = %v, want errOutboundQueueFull", err)
+	}
+}
+
+func TestBroadcastRemovesSlowClientWhenQueueIsFull(t *testing.T) {
+	resetHubForTest()
+
+	senderServer, senderClient := net.Pipe()
+	slowServer, slowClient := net.Pipe()
+	fastServer, fastClient := net.Pipe()
+	defer senderClient.Close()
+	defer slowClient.Close()
+	defer fastClient.Close()
+
+	sender := hub.add(senderServer)
+	slow := hub.add(slowServer)
+	fast := hub.add(fastServer)
+
+	go handleConnection(sender)
+	go handleConnection(fast)
+
+	sendHello(t, senderClient, "sender")
+	sendHello(t, fastClient, "fast")
+
+	// Fill slow client's queue so the next broadcast enqueue hits queue-full.
+	for {
+		err := slow.enqueue(&protocolv1.WireMessage{
+			Version: protocol.ProtocolVersion,
+			Body: &protocolv1.WireMessage_ServerEvent{
+				ServerEvent: &protocolv1.ServerEvent{Sender: "server", Text: "backpressure"},
+			},
+		})
+		if err == nil {
+			continue
+		}
+		if errors.Is(err, errOutboundQueueFull) {
+			break
+		}
+		t.Fatalf("unexpected enqueue error while filling slow queue: %v", err)
+	}
+
+	if err := protocol.WriteWireMessage(senderClient, &protocolv1.WireMessage{
+		Version: protocol.ProtocolVersion,
+		Body: &protocolv1.WireMessage_ClientMessage{
+			ClientMessage: &protocolv1.ClientMessage{Text: "hello healthy client"},
+		},
+	}); err != nil {
+		t.Fatalf("write chat message: %v", err)
+	}
+
+	waitForCondition(t, time.Second, func() bool {
+		hub.mu.RLock()
+		defer hub.mu.RUnlock()
+		_, slowPresent := hub.clients[slow.id]
+		_, fastPresent := hub.clients[fast.id]
+		return !slowPresent && fastPresent
+	})
+
+	message, err := protocol.ReadWireMessage(fastClient)
+	if err != nil {
+		t.Fatalf("read fast client message: %v", err)
+	}
+	event := message.GetServerEvent()
+	if event == nil {
+		t.Fatalf("expected server event for fast client, got %#v", message.GetBody())
+	}
+	if got := event.GetText(); got != "hello healthy client" {
+		t.Fatalf("fast client text = %q, want %q", got, "hello healthy client")
+	}
+
+	if got := atomic.LoadUint64(&metrics.queueFullDisconnects); got == 0 {
+		t.Fatal("expected queue-full disconnect metric to increment")
 	}
 }
