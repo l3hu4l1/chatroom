@@ -54,8 +54,14 @@ func (h *chatHub) add(conn net.Conn) *client {
 	defer h.mu.Unlock()
 
 	h.nextID++
-	c := &client{id: h.nextID, conn: conn}
+	c := &client{
+		id:       h.nextID,
+		conn:     conn,
+		outbound: make(chan *protocolv1.WireMessage, outboundQueueSize),
+		done:     make(chan struct{}),
+	}
 	h.clients[c.id] = c
+	c.startWriter()
 	return c
 }
 
@@ -86,9 +92,16 @@ func (h *chatHub) snapshotExcept(skipID uint64) []*client {
 	return clients
 }
 
-func (c *client) write(message *protocolv1.WireMessage) error {
-	c.writeMu.Lock()
-	defer c.writeMu.Unlock()
+func (c *client) startWriter() {
+	go func() {
+		for message := range c.outbound {
+			if err := protocol.WriteWireMessage(c.conn, message); err != nil {
+				c.close()
+				return
+			}
+		}
+	}()
+}
 
 	return protocol.WriteWireMessage(c.conn, message)
 }
